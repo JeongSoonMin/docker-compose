@@ -1,0 +1,70 @@
+version: '3.8'
+services:
+  mongo1:
+    container_name: mongo1
+    image: mongo
+    hostname: mongo1
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root1234!@
+      TZ: Asia/Seoul
+    volumes:
+      - ./data/db/replica/mongo1:/data/db
+      - ./mongodb.key:/etc/mongodb.key 
+    command:
+      - '--replSet'
+      - 'myReplicaSet'
+      - '--keyFile'
+      - '/etc/mongodb.key'
+      - '--bind_ip_all'
+  mongo2:
+    container_name: mongo2
+    image: mongo
+    hostname: mongo2
+    ports:
+      - "27018:27018"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root1234!@
+      TZ: Asia/Seoul
+    depends_on:
+      - mongo1
+    volumes:
+      - ./data/db/replica/mongo2:/data/db
+      - ./mongodb.key:/etc/mongodb.key
+    command:
+      - '--replSet'
+      - 'myReplicaSet'
+      - '--keyFile'
+      - '/etc/mongodb.key'
+      - '--bind_ip_all'
+      - '--port'
+      - '27018'
+  mongo3:
+    container_name: mongo3
+    image: mongo
+    hostname: mongo3
+    ports:
+      - "27019:27019"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root1234!@
+      TZ: Asia/Seoul
+    depends_on:
+      - mongo2
+    volumes:
+      - ./data/db/replica/mongo3:/data/db
+      - ./mongodb.key:/etc/mongodb.key
+    command:
+      - '--replSet'
+      - 'myReplicaSet'
+      - '--keyFile'
+      - '/etc/mongodb.key'
+      - '--bind_ip_all'
+      - '--port'
+      - '27019'
+networks:
+  default:
+    name: mongoCluster
